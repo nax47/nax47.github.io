@@ -1,1 +1,230 @@
-Hello World
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Run Eat Run Test</title>
+</head>
+<body>
+
+<canvas id="myCanvas" onmousemove="myFunction(event)" width="1000" height="500"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.4.4/randomColor.js"></script>
+
+<script>
+ function myFunction(e) {
+     mousex = e.clientX;
+     mousey = e.clientY;
+    }
+
+var mousex;
+var mousey;
+var canvas = document.getElementById("myCanvas");
+canvas.style.background = 'black';
+var ctx = canvas.getContext("2d");
+var player_size = 20;
+var player_x = canvas.width/2;
+var player_y = canvas.height-30;
+
+var d = Math.sqrt( (canvas.width/2)*(canvas.width/2) + (3*canvas.height/4)*(3*canvas.height/4));
+
+//arrow keys
+var rightPressed = false;
+var leftPressed = false;
+var upPressed = false;
+var downPressed = false;
+
+//Shape size
+var maxsize = 60;
+var minsize = 20;
+
+//Shape object
+var Shape = function(id,x,y,size,color){
+    console.log("Shape created");
+    this.id = id;
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.color = color;
+};
+
+//Method for shape to draw itself
+Shape.prototype.draw = function(ctx) {
+    ctx.beginPath();
+    ctx.fillRect (this.x, this.y, this.size, this.size);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.closePath();
+    console.log("Square number " + this.id + " has been created at: "+this.x+","+ this.y);
+};
+
+//Array for storing shapes
+var shapes = [];
+for(var i=0; i<10; i++){
+    var size = generateSize();
+    shapes.push(new Shape(i+1,generateX(size),generateY(size),size, randomColor()));
+}
+
+//Player shape
+var player = new Shape(0,player_x,player_y,player_size,randomColor());
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+function keyDownHandler(e) {
+    if(e.keyCode == 39) {
+        rightPressed = true;
+    }
+    else if(e.keyCode == 37) {
+        leftPressed = true;
+    }
+     if(e.keyCode == 40) {
+        upPressed = true;
+    }
+    else if(e.keyCode == 38) {
+        downPressed = true;
+    }
+}
+
+function keyUpHandler(e) {
+    if(e.keyCode == 39) {
+        rightPressed = false;
+    }
+    else if(e.keyCode == 37) {
+        leftPressed = false;
+    }
+
+     if(e.keyCode == 40) {
+        upPressed = false;
+    }
+    else if(e.keyCode == 38) {
+        downPressed = false;
+    }
+}
+
+//Method to generate random X coordinate for a shape
+function generateX(size){
+return Math.random() * (canvas.width-size);
+}
+
+//Method to generate random Y coordinate for a shape
+function generateY(size){
+return Math.random() * (canvas.height-size);
+}
+
+//Method to generate random size for a shape
+function generateSize(){
+return Math.random() * (maxsize - minsize) + minsize;
+}
+
+// function drawBall() {
+//     console.log(x,y);
+//     console.log(mousex,mousey);
+//     ctx.beginPath();
+//     ctx.arc(x, y, size, 0, Math.PI*2);
+
+//     ctx.fillStyle = "#0095DD";
+//     ctx.fill();
+
+//     //ctx.strokeRect(x,y,50,50);
+//     ctx.closePath();
+// }
+    
+// function drawSquare() {
+//     console.log(x,y);
+//     console.log(mousex,mousey);
+//     ctx.beginPath();
+//     ctx.fillRect (x, y, size, size);
+//     ctx.fillStyle = "#0095DD";
+//     ctx.fill();
+//     ctx.closePath();
+    
+// }
+    
+//function speed() {
+    //var dist = Math.sqrt(pow(mousex-x,2)+pow(mousey-y,2));
+    //return dist
+//}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // for(var i=0; i<shapes.length; i++){
+    //     shapes[i].draw();
+    // }  
+    shapes.forEach(function(shape){
+        shape.draw(ctx);
+    });
+    player.draw(ctx);
+
+    //var prev_x = player.x;
+    //var prev_y = player.y;
+    //var size = player.size;
+
+    var dist = Math.sqrt(Math.pow(mousex-player.x,2)+Math.pow(mousey-player.y,2));
+
+    var maxDist= Math.sqrt(Math.pow(canvas.width,2)+Math.pow(canvas.height,2));
+    
+    var speedFactor=10*((maxDist-dist)/maxDist+1);
+
+    if(mousex>0 && mousex<canvas.width &&mousey>0 &&mousey<canvas.height){
+    player.x=(mousex-player.x)/speedFactor+player.x;
+    player.y=(mousey-player.y)/speedFactor+player.y;
+    }
+
+    var speed = dist/50
+
+    //arrowkeys
+    if(rightPressed && x < canvas.width-(size*2)) {
+        player.x += speed;
+    }
+    else if(leftPressed && x > 0) {
+        player.x -= speed;
+    }
+
+    if(upPressed && y < canvas.height-(size*2)) {
+        player.y += speed;
+    }
+    else if(downPressed && y > 0) {
+        player.y -= speed;
+    }
+
+    //mouse
+
+    // if(mousex>x+(size-1) && x < canvas.width-(size*2)) {
+    // 	 x += speed;
+    // }
+    // else if(mousex<x+10  && x > 0)
+    // {
+    // 	x -= speed;
+    // }
+
+    // if(mousey>y+(size-3) && y < canvas.height-(size*2)) {
+    //     y += speed;
+    // }
+    // else if(mousey<y+9 && y > 0) {
+    //     y -= speed;
+    // }
+
+
+    // if(mousex>x+size && x < canvas.width-(size*2)) {
+    //   x += speed;
+    // }
+    // else if(mousex<x-size  && x > 0)
+    // {
+    //  x -= speed;
+    // }
+
+    // if(mousey>y+size && y < canvas.height-(size*2)) {
+    //     y += speed;
+    // }
+    // else if(mousey<y -size&& y > 0) {
+    //     y -= speed;
+    // }
+    //ctx.clearRect(prev_x,prev_y,size,size);
+}
+
+setInterval(draw, 10);
+    
+</script>
+
+</body>
+</html>
