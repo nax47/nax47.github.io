@@ -2,29 +2,53 @@
 <html>
 <head>
     <title>Run Eat Run Test</title>
+    <style>
+        html,body {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            overflow: hidden;
+        }
+        
+        canvas {
+            position: absolute;
+            top:0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin:auto;
+        }
+            
+    </style>
 </head>
 <body>
 
-<canvas id="myCanvas" onmousemove="myFunction(event)" width="1000" height="500"></canvas>
+<canvas id="myCanvas" width="1000" height="750" ></canvas>
+    
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.4.4/randomColor.js"></script>
-
 <script>
- function myFunction(e) {
-     mousex = e.clientX;
-     mousey = e.clientY;
-    }
-
+"use strict";
 var mousex;
 var mousey;
 var canvas = document.getElementById("myCanvas");
 canvas.style.background = 'black';
+canvas.addEventListener('mousemove', function(event){
+    mousex = event.clientX-canvas.getBoundingClientRect().left;
+    mousey = event.clientY-canvas.getBoundingClientRect().top;
+  });
 var ctx = canvas.getContext("2d");
+//ctx.canvas.width  = window.innerWidth;
+//ctx.canvas.height = window.innerHeight;
 var player_size = 20;
 var player_x = canvas.width/2;
 var player_y = canvas.height-30;
+var ratio=16/9;
+var maxNumShapes=5;
+var minNumShapes=5;
+var numShapes = getRandomIntInclusive(minNumShapes,maxNumShapes);
 
-var d = Math.sqrt( (canvas.width/2)*(canvas.width/2) + (3*canvas.height/4)*(3*canvas.height/4));
+//var d = Math.sqrt( (canvas.width/2)*(canvas.width/2) + (3*canvas.height/4)*(3*canvas.height/4));
 
 //arrow keys
 var rightPressed = false;
@@ -35,36 +59,79 @@ var downPressed = false;
 //Shape size
 var maxsize = 60;
 var minsize = 20;
+var maxspeed = 5;
+var minspeed = -5;
 
 //Shape object
-var Shape = function(id,x,y,size,color){
+var Shape = function(x,y,size,color,speedx,speedy){
     console.log("Shape created");
-    this.id = id;
     this.x = x;
     this.y = y;
     this.size = size;
     this.color = color;
+    this.speedx=speedx;
+    this.speedy=speedy;
 };
 
 //Method for shape to draw itself
 Shape.prototype.draw = function(ctx) {
     ctx.beginPath();
-    ctx.fillRect (this.x, this.y, this.size, this.size);
     ctx.fillStyle = this.color;
-    ctx.fill();
-    ctx.closePath();
-    console.log("Square number " + this.id + " has been created at: "+this.x+","+ this.y);
+    ctx.fillRect (this.x, this.y, this.size, this.size);
+    //ctx.closePath();
+    //console.log("Square number " + this.id + " has been created at: "+this.x+","+ this.y);
 };
 
+// Shape.prototype.getTopLeftCorner = function(){
+//     var point = {x: this.x, y: this.y};
+//     return point;
+// };
+
+// Shape.prototype.getTopRightCorner = function(){
+//     var point = {x: this.x+this.size, y: this.y};
+//     return point;
+// };
+
+// Shape.prototype.getBottomLeftCorner = function(){
+//     var point = {x: this.x, y: this.y+this.size};
+//     return point;
+// };
+
+// Shape.prototype.getBottomRightCorner = function(){
+//     var point = {x: this.x+this.size, y: this.y+this.size};
+//     return point;
+// };
+
+Shape.prototype.getCenter = function(){
+    return {x: this.x+(this.size/2), y: this.y+(this.size/2)};
+};
+    
+Shape.prototype.changeSize = function(ratio) {
+    this.size*=ratio;
+};
+    
+    
+//function color() {
+//    do {
+//        var c = randomColor();
+//    }
+//    while (c=="#000000");
+//    console.log("c");
+//    console.log(c);
+//}
+
+    
 //Array for storing shapes
 var shapes = [];
-for(var i=0; i<10; i++){
+for(var i=0; i<numShapes; i++){
     var size = generateSize();
-    shapes.push(new Shape(i+1,generateX(size),generateY(size),size, randomColor()));
+    shapes.push(new Shape(generateX(size),generateY(size),size,randomColor(),getRandomIntInclusive(minspeed,maxspeed),getRandomIntInclusive(minspeed,maxspeed)));
+    console.log("shape");
+    console.log(shapes[i].color);
 }
 
 //Player shape
-var player = new Shape(0,player_x,player_y,player_size,randomColor());
+var player = new Shape(player_x,player_y,player_size,randomColor());
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -100,6 +167,68 @@ function keyUpHandler(e) {
     }
 }
 
+function resize_canvas(){
+    var oldCanvasWidth = canvas.width;
+    var oldCanvasHeight = canvas.height;
+    if (canvas.width  != window.innerWidth || canvas.height != window.innerHeight) {
+        if (window.innerWidth>window.innerHeight*ratio) {
+            canvas.height=window.innerHeight;
+            canvas.width=canvas.height*ratio;
+            var changeInWidthRatio=canvas.width/oldCanvasWidth;
+            var changeInHeightRatio=canvas.height/oldCanvasHeight;
+                shapes.forEach(function(shape){
+                    shape.x*=changeInWidthRatio;
+                    shape.y*=changeInHeightRatio;
+                    shape.changeSize(changeInHeightRatio);
+                });
+                player.changeSize(changeInHeightRatio);
+        } else {
+            canvas.width=window.innerWidth;
+            canvas.height=canvas.width/ratio;
+            var changeInWidthRatio=canvas.width/oldCanvasWidth;
+            var changeInHeightRatio=canvas.height/oldCanvasHeight;
+                shapes.forEach(function(shape){
+                    shape.x*=changeInWidthRatio;
+                    shape.y*=changeInHeightRatio;
+                    shape.changeSize(changeInWidthRatio);
+                    shape.size*=changeInWidthRatio;
+                });
+
+                player.changeSize(changeInWidthRatio);
+        }
+        
+    }
+
+}
+
+function getDistance(x1,y1,x2,y2){
+    return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
+}
+    
+ function checkCollisions(){
+    for(var i=0; i<shapes.length; i++){
+        var shape=shapes[i];
+        var half=(shape.size)/2;
+        if(getDistance(player.x,player.y,shape.getCenter().x,shape.getCenter().y)<=half
+        || getDistance(player.x+player.size,player.y,shape.getCenter().x,shape.getCenter().y)<=half
+        || getDistance(player.x,player.y+player.size,shape.getCenter().x,shape.getCenter().y)<=half
+        || getDistance(player.x+player.size,player.y+player.size,shape.getCenter().x,shape.getCenter().y)<=half
+        || getDistance(player.getCenter().x,player.getCenter().y,shape.getCenter().x,shape.getCenter().y)
+        <=(player.size+shape.size)/2
+        )
+        {
+            console.log("Collision!");
+            eatShape(i,shape);
+            //return true;
+        }
+    }
+ }   
+    
+function eatShape(index,shape){
+    shapes.splice(index,1);
+    player.size+=(shape.size/2);
+}
+    
 //Method to generate random X coordinate for a shape
 function generateX(size){
 return Math.random() * (canvas.width-size);
@@ -144,16 +273,58 @@ return Math.random() * (maxsize - minsize) + minsize;
     //return dist
 //}
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+function moveShape(shape){
+    var time = (new Date()).getTime() - startTime;
+    var newX = shape.x+(shape.speedx); // * time / 1000);
+    var newY = shape.y+(shape.speedy); //* time / 1000);
+    if(shape.speedx>0 && newX<(canvas.width - shape.size)){
+        shape.x = newX;
+    }
+    else if (shape.speedx>0){
+        shape.speedx*=-1;
+        shape.x-=1;
+    }
+    if(shape.speedx<0 && newX>0){
+        shape.x = newX;
+    }
+    else if (shape.speedx<0){
+        shape.speedx*=-1;
+        shape.x+=1;
+    }
+    if(shape.speedy<0 && newY>0){
+        shape.y = newY;
+    }
+    else if (shape.speedy<0){
+        shape.speedy*=-1;
+        shape.y+=1;
+    }
+    if(shape.speedy>0 && newY<(canvas.height - shape.size)){
+        shape.y = newY;
+    }
+    else if (shape.speedy>0){
+        shape.speedy*=-1;
+        shape.y-=1;
+    }
+}
 
+function draw() {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    shapes.forEach(function(shape){
+        moveShape(shape,startTime);
+    });
+    resize_canvas();
     // for(var i=0; i<shapes.length; i++){
     //     shapes[i].draw();
     // }  
+    checkCollisions();
+
     shapes.forEach(function(shape){
         shape.draw(ctx);
     });
     player.draw(ctx);
+
+
 
     //var prev_x = player.x;
     //var prev_y = player.y;
@@ -164,6 +335,7 @@ function draw() {
     var maxDist= Math.sqrt(Math.pow(canvas.width,2)+Math.pow(canvas.height,2));
     
     var speedFactor=10*((maxDist-dist)/maxDist+1);
+    
 
     if(mousex>0 && mousex<canvas.width &&mousey>0 &&mousey<canvas.height){
     player.x=(mousex-player.x)/speedFactor+player.x;
@@ -220,9 +392,17 @@ function draw() {
     //     y -= speed;
     // }
     //ctx.clearRect(prev_x,prev_y,size,size);
+    window.requestAnimationFrame(draw);
+}
+    
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-setInterval(draw, 10);
+var startTime = (new Date()).getTime();
+window.requestAnimationFrame(draw);   
     
 </script>
 
