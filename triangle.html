@@ -37,16 +37,14 @@
         <script type="text/javascript">
         var valid = document.getElementById("valid");
        	function TriangleTest(){
-       		var A = document.getElementById("A").value;
-       		var B = document.getElementById("B").value;
-        	var C = document.getElementById("C").value;
-        	if(A+B>C || B+C>A || A+C>B){
+       		var A = parseInt(document.getElementById("A").value);
+       		var B = parseInt(document.getElementById("B").value);
+        	var C = parseInt(document.getElementById("C").value);
+        	if((A+B>C) && (B+C>A) && (A+C>B)){
         		valid.value = "YES";
-        		console.log("valid1");
         	}
         	else{
         		valid.value = "NO";
-        		console.log("valid2");
         	}
         }
         </script>

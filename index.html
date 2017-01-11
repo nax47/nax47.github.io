@@ -40,9 +40,9 @@ canvas.addEventListener('mousemove', function(event){
 var ctx = canvas.getContext("2d");
 //ctx.canvas.width  = window.innerWidth;
 //ctx.canvas.height = window.innerHeight;
-var player_size = 20;
-var player_x = canvas.width/2;
-var player_y = canvas.height-30;
+var player_size = 40;
+var player_x = canvas.width/2+player_size/2;
+var player_y = 0;
 var ratio=16/9;
 var maxNumShapes=15;
 var minNumShapes=5;
@@ -57,10 +57,10 @@ var upPressed = false;
 var downPressed = false;
 
 //Shape size
-var maxsize = 60;
+var maxsize = 80;
 var minsize = 20;
-var maxspeed = 0;
-var minspeed = 0;
+var maxspeed = 2;
+var minspeed = -2;
 var spinSpeed = 250;
 
 //Shape object
@@ -235,16 +235,48 @@ function getDistance(x1,y1,x2,y2){
         || getDistance(player.getCenter().x,player.getCenter().y,shape.getCenter().x,shape.getCenter().y)
         <=(player.size+shape.size)/2) && shape.inCollision==undefined
         )
-        {
-            player.StartAnimation(currentTime, 500, player.size + shape.size);
-            shape.speedx=0;
-            shape.speedy=0;
-            shape.inCollision = true;
-            shape.StartAnimation(currentTime, 500, 0);
+        {   
+            // if(player.size>shape.size){
+            // player.StartAnimation(currentTime, 500, player.size + shape.size/3);
+            // shape.speedx=0;
+            // shape.speedy=0;
+            // shape.inCollision = true;
+            // shape.StartAnimation(currentTime, 500, 0);
+            // }
+            if(true){
+                console.log("same size collision");
+                if(player.y+player.size>=shape.y){
+                    console.log("player on top");
+                    shape.y+=2;
+                    shape.speedy*=-1;
+                }
+                if(player.x<=shape.x+shape.size){
+                    shape.x-=2;
+                    shape.speedx*=-1;
+                }
+                if(player.y<=shape.y+shape.size){
+                    shape.y-=2;
+                    shape.speedy*=-1;
+                }
+                if(player.x+player.size>=shape.x){
+                    shape.x+=2;
+                    shape.speedx*=-1;
+                }
+            }
+            // else{
+            //     endGame();
+            // }
         }
     }
  }   
     
+function endGame(){
+    // ctx.font=canvas.length/3+"px Arial"
+    // ctx.fillStyle = "white";
+    // ctx.fillText("GAME OVER!",0,0);
+    alert("GAME OVER!");
+    document.location.reload();
+}  
 // function eatShape(index,shape){
 //     shapes.splice(index,1);
 //     player.size+=(shape.size/2);
