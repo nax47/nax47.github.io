@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	<title> Triangle Test </title>
+	<style>
+	#validlabel {
+		margin-left: 50px;
+	}
+	#valid {
+		margin-left: 50px;
+		width: 50px;
+	}
+	</style>
+	</head>
+	<body>
+		<p>
+          <label>A:</label>
+          <input type = "text"
+                 id = "A" />
+          <label id="validlabel">VALID:</label>
+        </p>
+        <p>
+          <label>B:</label>
+          <input type = "text"
+                 id = "B" />
+          <input type = "text"
+                 id = "valid" />
+        </p>
+        <p>
+          <label>C:</label>
+          <input type = "text"
+                 id = "C" />
+        </p>
+        <p>
+          <button type="button" onclick="TriangleTest()">Submit</button>
+        </p>
+        <script type="text/javascript">
+        var valid = document.getElementById("valid");
+       	function TriangleTest(){
+       		var A = document.getElementById("A").value;
+       		var B = document.getElementById("B").value;
+        	var C = document.getElementById("C").value;
+        	if(A+B>C || B+C>A || A+C>B){
+        		valid.value = "YES";
+        		console.log("valid1");
+        	}
+        	else{
+        		valid.value = "NO";
+        		console.log("valid2");
+        	}
+        }
+        </script>
+  	</body>
+    </html>
